@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRATH Soluções de Entrega</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>CRATH Soluções de Entrega</h1>
+        <h2>Previsão Inteligente de Plataforma</h2>
+
+        <form id="predict-form">
+            <label for="distance">Distância (km):</label>
+            <input type="number" id="distance" name="distance" step="0.1" required>
+
+            <label for="time">Tempo Estimado (min):</label>
+            <input type="number" id="time" name="time" step="0.1" required>
+
+            <label for="price">Preço do Frete (R$):</label>
+            <input type="number" id="price" name="price" step="0.01" required>
+
+            <label for="availability">Quantidade de Motoristas Disponíveis:</label>
+            <input type="number" id="availability" name="availability" min="0" required>
+
+            <button type="submit">Calcular Melhor Opção</button>
+        </form>
+
+        <div id="prediction-result"></div>
+    </div>
+
+    <div class="footer">
+        &copy; 2025 CRATH Soluções de Entrega. Todos os direitos reservados.
+    </div>
+
+    <script>
+        document.getElementById('predict-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const availabilityValue = parseFloat(document.getElementById('availability').value);
+
+            const data = {
+                distancia_km: parseFloat(document.getElementById('distance').value),
+                tempo_estimado_min: parseFloat(document.getElementById('time').value),
+                preco_frete: parseFloat(document.getElementById('price').value),
+                quantidade_motoristas: availabilityValue
+            };
+
+            fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                document.getElementById('prediction-result').innerHTML = `
+                    <p><strong>Melhor Plataforma:</strong> ${result.prediction}</p>
+                    <p><strong>Distância:</strong> ${data.distancia_km} km</p>
+                    <p><strong>Tempo Estimado:</strong> ${data.tempo_estimado_min} min</p>
+                    <p><strong>Preço do Frete:</strong> R$ ${data.preco_frete.toFixed(2)}</p>
+                    <p><strong>Quantidade de Motoristas Disponíveis:</strong> ${data.quantidade_motoristas}</p>
+                    <p><strong>Probabilidades:</strong></p>
+                    <ul>
+                        <li>Uber: ${result.probabilidades.Uber}%</li>
+                        <li>iFood: ${result.probabilidades.iFood}%</li>
+                    </ul>
+                `;
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                document.getElementById('prediction-result').innerText = 'Erro ao obter predição.';
+            });
+        });
+    </script>
+
+</body>
+</html>

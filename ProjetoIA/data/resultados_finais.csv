@@ -1,0 +1,3 @@
+modelo,acuracia 
+RandomForest,0.92
+DecisionTree,0.85
